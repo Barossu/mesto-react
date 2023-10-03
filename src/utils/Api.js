@@ -1,8 +1,7 @@
 class Api {
   constructor(options) {
     this._baseURL = options.baseURL;
-    this._key = options.headers.authorization;
-    this._contentType = options.headers['Content-Type'];
+    this._headers = options.headers;
   };
   
   _getResponseData(res) {
@@ -10,95 +9,61 @@ class Api {
         return Promise.reject(`Ошибка: ${res.status}`); 
     }
     return res.json();
- };
-  
-  getInitialCards() {
-    return fetch(`${this._baseURL}/cards`, {
-      method: 'GET',
-      headers:{
-        authorization: this._key
-      }
-    })
-      .then(res => this._getResponseData(res))
   };
 
+  _request(url, options) {
+    return fetch(url, options).then(this._getResponseData)
+  };
+
+  
+  getInitialCards() {
+    return this._request(`${this._baseURL}/cards`, { method: 'GET', headers: this._headers });
+  };
+
+  getProfileInfo(){
+    return this._request(`${this._baseURL}/users/me`, { method: 'GET', headers: this._headers });
+  };
+  
   postNewCard(cardValues){
-    return fetch(`${this._baseURL}/cards`, {
+    return this._request(`${this._baseURL}/cards`, {
       method: 'POST',
-      headers:{
-        authorization: this._key,
-        'Content-Type': this._contentType
-      },
+      headers: this._headers,
       body: JSON.stringify({
         name: cardValues.name,
         link: cardValues.link
       })
-    })
-    .then(res => this._getResponseData(res))
-  };
-
-
-  getProfileInfo(){
-    return fetch(`${this._baseURL}/users/me`, {
-      method: 'GET',
-      headers:{
-        authorization: this._key
-      }
-    })
-      .then(res => this._getResponseData(res))
+    });
   };
 
   patchProfileInfo(profileName, profileInfo){
-    return fetch(`${this._baseURL}/users/me`, {
+    return this._request(`${this._baseURL}/users/me`, {
       method: 'PATCH',
-      headers:{
-        authorization: this._key,
-        'Content-Type': this._contentType
-      },
+      headers: this._headers,
       body: JSON.stringify({
         name: profileName,
         about: profileInfo
       })
-    })
-    .then(res => this._getResponseData(res))
+    });
   };
 
   patchProfileAvatar(avatarLink){
-    return fetch(`${this._baseURL}/users/me/avatar`, {
+    return this._request(`${this._baseURL}/users/me`, {
       method: 'PATCH',
-      headers:{
-        authorization: this._key,
-        'Content-Type': this._contentType
-      },
+      headers: this._headers,
       body: JSON.stringify({
         avatar: avatarLink.link
       })
-    })
-    .then(res => this._getResponseData(res))
+    });
   };
 
   toggleLike(cardId, isLiked){
-    return fetch(`${this._baseURL}/cards/${cardId}/likes`, {
-      method: isLiked ? 'DELETE' : 'PUT',
-      headers:{
-        authorization: this._key,
-        'Content-Type': this._contentType
-      }
-    })
-    .then(res => this._getResponseData(res))
+    return this._request(`${this._baseURL}/cards/${cardId}/likes`, { method: isLiked ? 'DELETE' : 'PUT', headers: this._headers });
   };
 
   deleteCard(cardId){
-    return fetch(`${this._baseURL}/cards/${cardId}`, {
-      method: 'DELETE',
-      headers:{
-        authorization: this._key,
-        'Content-Type': this._contentType
-      }
-    })
-    .then(res => this._getResponseData(res))
+    return this._request(`${this._baseURL}/cards/${cardId}`, { method: 'DELETE', headers: this._headers });
   };
-}
+ }
 
 const api = new Api({
   baseURL: 'https://mesto.nomoreparties.co/v1/cohort-75',

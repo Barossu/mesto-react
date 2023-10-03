@@ -3,9 +3,9 @@ import api from '../utils/Api.js';
 import Card from './Card.js';
 
 function Main(props){
-  const [userName, setUserName] = React.useState();
-  const [userDescription, setUserDescription] = React.useState();
-  const [userAvatar, setUserAvatar] = React.useState();
+  const [userName, setUserName] = React.useState("");
+  const [userDescription, setUserDescription] = React.useState("");
+  const [userAvatar, setUserAvatar] = React.useState("");
   const [cards, setCards] = React.useState([]);
 
   React.useEffect(() => {
@@ -15,13 +15,13 @@ function Main(props){
         setUserDescription(profileInfo.about);
         setUserAvatar(profileInfo.avatar);
       })
-      .catch(err => console.log(`Ошибка: ${err}`))
+      .catch(console.error)
   }, [])
 
   React.useEffect(() => {
     api.getInitialCards()
       .then(res => setCards(res))
-      .catch(err => console.log(`Ошибка: ${err}`))
+      .catch(console.error)
   }, [])
 
   return(
@@ -43,8 +43,8 @@ function Main(props){
       </section>
 
       <section className="elements" aria-label="Карточки с фото">
-        {cards.map((cardInfo, i) => (
-          <article className="elements__element" key={i}>
+        {cards.map((cardInfo) => (
+          <article className="elements__element" key={cardInfo._id}>
             <Card onCardClick={props.onCardClick} card={cardInfo} />
           </article>
         ))}

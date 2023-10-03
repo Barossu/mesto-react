@@ -51,7 +51,6 @@ function App() {
       </PopupWithForm>
 
       <PopupWithForm name='editProfile' title='Редактировать профиль' buttonText='Сохранить' isOpen={isEditProfilePopupOpen} onClose={closeAllPopups}>       
-        <>
           <label className="popup__input-container">
             <input type="text" id="name-field"  name="name-field" className="popup__input popup__input_type_name" placeholder="Введите имя" required minLength="2" maxLength="40" />
             <span className="popup__error" id="name-field-error"></span>
@@ -60,11 +59,9 @@ function App() {
             <input type="text" id="description-field" name="description-field" className="popup__input popup__input_type_description" placeholder="О себе" required minLength="2" maxLength="200" />
             <span className="popup__error" id="description-field-error"></span>
           </label>
-        </>
       </PopupWithForm>
 
       <PopupWithForm name='addPlace' title='Новое место' buttonText='Создать' isOpen={isAddPlacePopupOpen} onClose={closeAllPopups}>
-        <>
           <label className="popup__input-container">
             <input type="text" id="place-name-field" name="name" className="popup__input" placeholder="Название" required minLength="2" maxLength="30" /> 
             <span className="popup__error" id="place-name-field-error"></span>
@@ -73,7 +70,6 @@ function App() {
             <input type="url" id="image-link-field" name="link" className="popup__input" placeholder="Ссылка на картинку" required />
             <span className="popup__error" id="image-link-field-error"></span>
           </label>
-        </>
       </PopupWithForm>
 
       <PopupWithForm name='removeCard' title='Вы уверены?' buttonText='Да' />
