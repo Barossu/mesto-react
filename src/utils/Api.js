@@ -24,13 +24,13 @@ class Api {
     return this._request(`${this._baseURL}/users/me`, { method: 'GET', headers: this._headers });
   };
   
-  postNewCard(cardValues){
+  postNewCard(name, link){
     return this._request(`${this._baseURL}/cards`, {
       method: 'POST',
       headers: this._headers,
       body: JSON.stringify({
-        name: cardValues.name,
-        link: cardValues.link
+        name: name,
+        link: link
       })
     });
   };
@@ -47,11 +47,11 @@ class Api {
   };
 
   patchProfileAvatar(avatarLink){
-    return this._request(`${this._baseURL}/users/me`, {
+    return this._request(`${this._baseURL}/users/me/avatar`, {
       method: 'PATCH',
       headers: this._headers,
       body: JSON.stringify({
-        avatar: avatarLink.link
+        avatar: avatarLink
       })
     });
   };
