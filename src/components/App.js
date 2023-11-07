@@ -7,8 +7,14 @@ import EditProfilePopup from './EditProfilePopup.js';
 import EditAvatarPopup from './EditAvatarPopup.js';
 import AddPlacePopup from './AddPlacePopup.js';
 import ImagePopup from './ImagePopup.js';
+import Register from './Register.js';
+import Login from './Login.js';
 import api from '../utils/Api.js';
+import ProtectedRouteElement from './ProtectedRoute.js';
+import * as auth from '../auth.js';
 import { CurrentUserContext } from '../contexts/CurrentUserContext.js';
+import { useNavigate, Navigate, Route, Routes } from 'react-router-dom'
+import InfoTooltip from './InfoTooltip.js';
 
 function App() {
 
@@ -18,6 +24,15 @@ function App() {
   const [selectedCard, setSelectedCard] = React.useState({isOpen: false, cardInfo: {}});
   const [currentUser, setCurrentUser] = React.useState({name: '', about: ''})
   const [cards, setCards] = React.useState([]);
+  const [loggedIn, setLoggedIn] = React.useState(false);
+  const [userEmail, setUserEmail] = React.useState('')
+  const [isRegister, setIsRegister] = React.useState(false)
+  const [isTooltipPopupOpen, setIsTooltipPopupOpen] = React.useState(false)
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    handleTokenCheck();
+  }, [loggedIn])
 
   React.useEffect(() => {
     api.getProfileInfo()
@@ -33,6 +48,34 @@ function App() {
       .catch(console.error)
   }, [])
 
+  function verificationOfRegistration(data){
+    setIsTooltipPopupOpen(true)
+    if (data){
+      setIsRegister(true)
+    } else {
+      setIsRegister(false)
+    }
+
+  }
+
+  function handleTokenCheck(){
+    if (localStorage.getItem('token')){
+      const token = localStorage.getItem('token')
+      auth.checkToken(token).then((res) => {
+        if (res){
+          setLoggedIn(true);
+          setUserEmail(res.data.email)
+          navigate('/main', {replace: true})
+        }
+      })
+    }
+  }
+
+  function handleSignOut(){
+    localStorage.removeItem('token');
+    setLoggedIn(false);
+  }
+
   function handleCardLike(card) {
     const isLiked = card.likes.some(item => item._id === currentUser._id)
     api.toggleLike(card._id, isLiked).then((newCard) => {
@@ -46,28 +89,28 @@ function App() {
     }).catch(console.error)
   }
 
-
   function handleCardClick(cardInfo){
-    setSelectedCard({isOpen: true, cardInfo: cardInfo})
+    setSelectedCard({isOpen: true, cardInfo: cardInfo});
   };
 
   function handleEditAvatarClick(){
-    setIsEditAvatarPopupOpen(true)
+    setIsEditAvatarPopupOpen(true);
   };
   
   function handleEditProfileClick(){
-    setIsEditProfilePopupOpen(true)
+    setIsEditProfilePopupOpen(true);
   };
   
   function handleAddPlaceClick(){
-    setIsAddPlacePopupOpen(true)
+    setIsAddPlacePopupOpen(true);
   };
 
   function closeAllPopups(){
-    setIsAddPlacePopupOpen(false)
-    setIsEditProfilePopupOpen(false)
-    setIsEditAvatarPopupOpen(false)
-    setSelectedCard({isOpen: false, cardInfo: {}})
+    setIsAddPlacePopupOpen(false);
+    setIsEditProfilePopupOpen(false);
+    setIsEditAvatarPopupOpen(false);
+    setIsTooltipPopupOpen(false);
+    setSelectedCard({isOpen: false, cardInfo: {}});
   };
 
   function handleUpdateUser(name, description){
@@ -91,21 +134,35 @@ function App() {
     }).catch(console.error)
   }
 
+  function handleLogin(){
+    setLoggedIn(true)
+  };
+
   return ( 
     <div className="page">
 
       <CurrentUserContext.Provider value={currentUser}>
-        <Header />
-        <Main
-          onEditProfile={handleEditProfileClick}
-          onAddPlace={handleAddPlaceClick}
-          onEditAvatar={handleEditAvatarClick}
-          onCardClick={handleCardClick}
-          onCardLike={handleCardLike}
-          onCardDelete={handleCardDelete}
-          cards={cards}
-        />
-        <Footer />
+        
+        <Header userEmail={userEmail} loggedIn={loggedIn} handleSignOut={handleSignOut} />
+
+        <Routes>
+          <Route path='/' element={!loggedIn ? <Navigate to='/signin' replace/> : <Navigate to='/main' replace/>} />
+          <Route path='/main' element={<ProtectedRouteElement
+            element={Main}
+            loggedIn={loggedIn}
+            onEditProfile={handleEditProfileClick}
+            onAddPlace={handleAddPlaceClick}
+            onEditAvatar={handleEditAvatarClick}
+            onCardClick={handleCardClick}
+            onCardLike={handleCardLike}
+            onCardDelete={handleCardDelete}
+            cards={cards}
+          />} />
+          <Route path='/signup' element={<Register checkRegister={verificationOfRegistration} />} />
+          <Route path='/signin' element={<Login handleLogin={handleLogin} />} />
+        </Routes>
+
+        {loggedIn && <Footer/>}
 
         <EditAvatarPopup onUpdateAvatar={handleUpdateAvatar} onClose={closeAllPopups} isOpen={isEditAvatarPopupOpen} />
 
@@ -116,6 +173,8 @@ function App() {
         <PopupWithForm name='removeCard' title='Вы уверены?' buttonText='Да' />
 
         <ImagePopup card={selectedCard} onClose={closeAllPopups} />
+
+        <InfoTooltip name='infoTooltip' onClose={closeAllPopups} isOpen={isTooltipPopupOpen} isRegister={isRegister} />
 
       </CurrentUserContext.Provider>
 

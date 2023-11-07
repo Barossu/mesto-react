@@ -1,10 +1,36 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom'
 import logoImage from '../images/logo_header.svg';
 
-function Header() {
+function Header({userEmail, loggedIn, handleSignOut}) {
+  const location = useLocation();
+  const [onMenu, setOnMenu] = React.useState(false);
+
+  function handleOnMenuClick(){
+    setOnMenu(true);
+  };
+
+  function handleOutMenuClick(){
+    setOnMenu(false);
+  }
+
   return(
     <header className="header">
-      <img className="header__logo" alt="Логотип" src={logoImage} />
+      <div className='header__logged'>
+        <img className="header__logo" alt="Логотип" src={logoImage} />
+        <button onClick={onMenu ? handleOutMenuClick : handleOnMenuClick} type='button' className={`header__button header__button_type_${onMenu ? 'on' : 'off'}`} name="open-menu-button" aria-label="Открыть меню"/>
+      </div>
+      {(!loggedIn) ?
+        (location.pathname === '/signup' ? 
+          <Link className='header__link' to='/signin'>Войти</Link>
+          :
+          <Link className='header__link' to='/signup'>Регистрация</Link>
+        ) :
+          <div className={`header__container ${!onMenu ? 'header__container_closed' : ''}`}>
+            <p className='header__user-email'>{userEmail}</p>
+            <Link onClick={handleSignOut} className='header__link header__link_singout' to='/signin'>Выйти</Link>
+          </div>
+      }
     </header>
   )
 };
